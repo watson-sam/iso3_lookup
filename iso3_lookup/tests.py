@@ -1,13 +1,17 @@
 import unittest
-from iso3_lookup.lookup import Lookup as L
+from iso3_lookup import get_iso3, get_country
 
 
 class MyTest(unittest.TestCase):
     def test1(self):
-        self.assertEqual(L.get_country("AFG"), "Afghanistan")
+        self.assertEqual(get_country("AFG"), "Afghanistan")
 
     def test2(self):
-        self.assertEqual(L.get_iso3("Albania"), "ALB")
+        self.assertEqual(get_iso3("Albania"), "ALB")
 
     def test3(self):
-        self.assertRaises(ValueError, L.get_iso3, "United Kingdom")
+        self.assertRaises(ValueError, get_iso3, "United Kingdom")
+
+
+if __name__ == "__main__":
+    unittest.main()
