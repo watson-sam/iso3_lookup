@@ -10,8 +10,12 @@ class MyTest(unittest.TestCase):
         self.assertEqual(get_iso3("Albania"), "ALB")
 
     def test3(self):
-        self.assertRaises(ValueError, get_iso3, "United Kingdom")
+        self.assertRaises(ValueError, get_iso3, "sdfsf")
+
+
+def run():
+    unittest.main()
 
 
 if __name__ == "__main__":
-    unittest.main()
+    run()

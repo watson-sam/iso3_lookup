@@ -4,9 +4,10 @@ from setuptools import setup, find_packages
 
 setup(
     name="iso3_lookup",
-    version="0.3.0",  # Defined in version.txt
+    version="0.5.0",
     packages=find_packages(),
-    # metadata for upload to PyPI
+    entry_points={"console_scripts": ["iso3_tests.py = iso3_lookup.tests.run"]},
+    install_requires=["fuzzywuzzy", "python-Levenshtein"],
     author="Sam Watson",
     author_email="quadquants@gmail.com",
     description="Go from iso3 -> country name and visa versa",
