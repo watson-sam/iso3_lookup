@@ -1,16 +1,45 @@
 import requests
 from fuzzywuzzy import fuzz
+import pickle
+import os
+
+PATH = os.path.join(os.path.split(__file__)[0], 'data', 'stored.pickle')
 
 
 class Lookup:
-    def __init__(self):
-        self.data = self.get_data()
+    def __new__(cls):
+        internet = cls.internet_on()
+        setup = object.__new__(cls)
+
+        if internet:
+            setup.data = cls.get_recent_data()
+        else:
+            setup.data = cls.get_stored_data()
+
+        return setup
 
     @staticmethod
-    def get_data(
+    def get_recent_data(
         url="https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regional-Codes/master/slim-3/slim-3.json"
     ):
-        return requests.get(url).json()
+        data = requests.get(url).json()
+        with open(PATH, 'wb') as f:
+            pickle.dump(data, f)
+        return data
+
+    @staticmethod
+    def get_stored_data():
+        with open(PATH, 'rb') as f:
+            data = pickle.loads(f)
+        return data
+
+    @staticmethod
+    def internet_on():
+        try:
+            requests.get('http://216.58.192.142', timeout=1)
+            return True
+        except Exception:
+            return False
 
     @staticmethod
     def conf_exists(l, var, value):
