@@ -1,5 +1,5 @@
 import requests
-from fuzzywuzzy import fuzz
+from rapidfuzz import fuzz
 import pickle
 import os
 
