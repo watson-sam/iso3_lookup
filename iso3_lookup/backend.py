@@ -1,65 +1,76 @@
+from pathlib import Path
+import pickle
 import requests
 from rapidfuzz import fuzz
-import pickle
-import os
 
-PATH = os.path.join(os.path.split(__file__)[0], "data", "stored.pickle")
+PATH = Path(__file__).parent.joinpath("data").joinpath("stored.pickle")
+URL = (
+    "https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regional-Codes"
+    "/master/all/all.json"
+)
 
 
 class Lookup:
-    def __new__(cls):
-        internet = cls.internet_on()
-        setup = object.__new__(cls)
-
-        if internet:
-            setup.data = cls.get_recent_data()
-        else:
-            setup.data = cls.get_stored_data()
-
-        return setup
-
-    @staticmethod
-    def get_recent_data(
-        url="https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regional-"
-            "Codes/master/slim-3/slim-3.json"
-    ):
-        data = requests.get(url).json()
-        with open(PATH, "wb") as f:
-            pickle.dump(data, f)
-        return data
-
-    @staticmethod
-    def get_stored_data():
-        with open(PATH, "rb") as f:
-            data = pickle.loads(f)
-        return data
+    def __init__(self):
+        if self.internet_on():
+            self.refresh_data()
+        self.data = self.get_stored_data()
 
     @staticmethod
     def internet_on():
+        """
+        Check if the internet connection is active and working.
+        """
         try:
             requests.get("http://216.58.192.142", timeout=1)
             return True
-        except Exception:
+        except requests.exceptions.ConnectionError:
             return False
 
     @staticmethod
-    def conf_exists(l, var, value):
-        if len(l) > 0:
-            return l[0][var]
-        raise ValueError(value + " does not exist in lookup data.")
+    def refresh_data():
+        """
+        Collect and save new data from github.
+        """
+        data = requests.get(URL).json()
+        with open(PATH, "wb") as f:
+            pickle.dump(data, f)
 
     @staticmethod
-    def get_fuzz(v, country, var):
-        v["ratio"] = fuzz.partial_ratio(v[var].lower(), country.lower())
-        return v
+    def get_stored_data():
+        """
+        Read data from local file.
+        """
+        with open(PATH, "rb") as f:
+            data = pickle.load(f)
+        return data
 
-    @staticmethod
-    def get_max(data):
-        return max([v["ratio"] for v in data])
+    def find_and_return_max(
+        self, name_of_given_text: str, text_to_match: str, name_of_return_text: str
+    ) -> str:
+        """
+        Find the `name_of_given_text` value in the data that is most like `text_to_match`
+        and return the associated `name_of_return_text`.
+        Attributes
+        ----------
+        name_of_return_text : str
+            name of the dictionary item to compare to (alpha-3, country, etc)
+        text_to_match: str
+            string of text to match values against.
+        name_of_return_text: str
+            name of the dictionary item to return (alpha-3, country, etc)
 
-    @staticmethod
-    def filter_data(data, cutoff=50):
-        return [v for v in data if v["ratio"] > cutoff]
-
-    def max_data(self, data):
-        return self.get_max(data), self.filter_data(data)
+        Returns
+        -------
+        str
+            Value in the data that best matches.
+        """
+        current_max, current_return_text = 0, None
+        for loop_dict in self.data:
+            ratio = fuzz.partial_ratio(
+                loop_dict[name_of_given_text].lower(), text_to_match.lower()
+            )
+            if ratio > current_max:
+                current_return_text = loop_dict[name_of_return_text]
+                current_max = ratio
+        return current_return_text

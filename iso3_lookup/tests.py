@@ -1,5 +1,5 @@
 import unittest
-from iso3_lookup import get_iso3, get_country
+from iso3_lookup import *
 
 
 class MyTest(unittest.TestCase):
@@ -10,7 +10,7 @@ class MyTest(unittest.TestCase):
         self.assertEqual(get_iso3("Albania"), "ALB")
 
     def test3(self):
-        self.assertRaises(ValueError, get_iso3, "sdfsf")
+        self.assertEqual(get_region("Brazil"), "Americas")
 
 
 def run():
