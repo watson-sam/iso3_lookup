@@ -16,3 +16,4 @@ excellent package and the latest version is pulled when the functions are import
 ## Usage 
 - `get_iso3(country)` - get the iso3 code from the country name.
 - `get_country(iso3)` - get the country name from the iso3 code.
+- `get_region(country)` - get the region name from the country code.
